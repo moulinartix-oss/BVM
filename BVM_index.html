@@ -529,6 +529,121 @@ body.fx-ambient a.button.social-chip:hover:not(:disabled){box-shadow:0 7px 18px 
 .social-card{position:relative;z-index:1}
 @media(max-width:380px){.brand-socials,.social-links{flex-wrap:wrap}}
 .quota-info{margin-top:4px;font-size:11.5px;color:var(--muted)}
+
+/* ===== Responsive mobile layout — v1.17.9 ===== */
+html{min-width:320px; -webkit-text-size-adjust:100%; text-size-adjust:100%; scroll-padding-top:90px}
+body{overflow-x:hidden}
+button,.button,.tool-btn,.more,.settings-button,.album-chip,.sort-trigger{touch-action:manipulation}
+input,select,textarea{max-width:100%}
+img,video,canvas{max-width:100%}
+@media(max-width:850px){
+  main{padding-left:clamp(14px,3vw,28px);padding-right:clamp(14px,3vw,28px)}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .heading{align-items:flex-start}
+}
+@media(max-width:560px){
+  .topbar{
+    height:auto;min-height:0;padding:9px 12px 10px;gap:9px;
+    flex-direction:column;align-items:stretch;justify-content:flex-start;
+  }
+  .brand-group{width:100%;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .brand{min-width:0;max-width:calc(100vw - 100px);flex:1;min-height:48px;padding:5px 8px 5px 5px;gap:8px}
+  .brandmark{width:36px;height:36px}
+  #galleryName{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+  .brand-socials{flex:none;gap:5px}
+  .brand-socials .social-links{gap:4px}
+  .brand-socials .button{width:36px;height:36px;min-width:36px;padding:7px}
+  .top-actions{width:100%;display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:nowrap}
+  .top-actions>.button{min-height:40px;padding:8px 11px;font-size:12px}
+  .top-actions .button.primary{margin-left:auto;white-space:nowrap}
+  .settings-button{width:40px;height:40px}
+  .theme-panel{
+    position:fixed;top:calc(env(safe-area-inset-top,0px) + 112px);right:10px;
+    width:min(560px,calc(100vw - 20px));max-height:calc(100dvh - 132px);
+    overflow-y:auto;overscroll-behavior:contain;z-index:90;
+  }
+  main{padding:22px 13px calc(76px + env(safe-area-inset-bottom,0px))}
+  .heading{gap:8px;margin-bottom:17px}
+  .heading h1{font-size:clamp(25px,7vw,32px);line-height:1.12}
+  .heading .sub{font-size:13px}
+  .count-summary{width:100%;flex-wrap:wrap}
+  .toolbar{margin:17px 0 18px;padding:9px;gap:8px;border-radius:12px}
+  .search{flex:1 1 100%;min-width:0}
+  .search input{min-height:44px;font-size:16px}
+  .filter-disclosure{flex:1 1 calc(50% - 5px);min-width:0}
+  .toolbar>.button{flex:1 1 calc(50% - 5px);min-width:0;min-height:42px;padding:8px 9px;font-size:12px}
+  .toolbar>.dice-btn{flex:0 0 44px;min-width:44px}
+  .filter-panel{position:fixed;top:var(--filter-panel-top,120px);left:10px;right:10px;transform:none;width:auto;max-height:calc(100dvh - 145px);overflow:auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:11px;z-index:100}
+  .filter-field{min-width:0}
+  .filter-select-ui,.filter-field .sort-menu{min-width:0;width:100%}
+  .album-strip{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;max-width:100%;padding:3px 1px 9px;margin:0 0 16px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .album-entry{flex:none}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .photo-card{border-radius:12px}
+  .thumb{aspect-ratio:4/3;object-fit:contain}
+  .meta{min-height:42px;padding:8px 9px;gap:5px}
+  .photo-name{font-size:11px}
+  .date{font-size:11px}
+  .pin-btn,.rename-btn{width:34px;height:34px;opacity:1;transform:none}
+  .pin-btn{top:7px;right:7px}
+  .rename-btn{top:7px;right:47px}
+  .more{font-size:22px;padding:5px 7px}
+  .empty{padding:42px 17px}
+  .viewer{padding:calc(48px + env(safe-area-inset-top,0px)) 6px calc(82px + env(safe-area-inset-bottom,0px))}
+  .viewer-stage{touch-action:none}
+  .viewer-image{max-width:100%;max-height:100%;width:auto;height:auto}
+  .viewer-caption{top:calc(9px + env(safe-area-inset-top,0px));left:10px;max-width:68vw}
+  .viewer-toolbar{bottom:calc(9px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 12px);overflow-x:auto;gap:1px;padding:5px;border-radius:12px}
+  .tool-btn{min-width:34px;height:36px;padding:0 6px}
+  .viewer-index,.zoom-level{min-width:36px;font-size:11px}
+  .tool-separator{margin:0 2px}
+  .album-modal,.album-confirm{padding:8px}
+  .album-dialog{width:100%;max-height:calc(100dvh - 16px);border-radius:15px}
+  .album-dialog-head{padding:14px 14px 10px}
+  .album-photo-list{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px;gap:8px}
+  .album-pick img{height:clamp(88px,27vw,124px);min-height:0;flex-basis:auto}
+  .album-dialog-foot{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))}
+  .album-dialog-foot .actions{gap:8px}
+  .album-dialog-foot .actions button{min-height:42px}
+  .album-confirm-card{padding:18px}
+  .album-confirm-actions{gap:8px}
+  .album-confirm-actions .button{min-height:42px}
+  .select-bar{bottom:calc(9px + env(safe-area-inset-bottom,0px));width:calc(100vw - 16px);max-width:none;justify-content:space-between;gap:5px;flex-wrap:wrap}
+  .select-count{flex:1 1 auto}
+  .select-bar .button{min-height:38px}
+  .undo-toast{bottom:calc(68px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 20px);gap:8px}
+  .to-top{right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  body.select-active .to-top{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .scroll-hint{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+  footer{padding:0 12px}
+}
+@media(max-width:380px){
+  .brand-socials .social-links{display:none}
+  .top-actions>.button{padding:7px 8px;font-size:11px}
+  .toolbar>.button{font-size:11px}
+  .grid{grid-template-columns:1fr}
+  .thumb{aspect-ratio:16/9}
+  .filter-panel{grid-template-columns:1fr}
+  .album-photo-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .viewer-toolbar{gap:0;padding:4px}
+  .tool-btn{min-width:30px;padding:0 4px}
+}
+@media(max-height:520px) and (orientation:landscape){
+  .topbar{position:relative}
+  .theme-panel{max-height:calc(100dvh - 20px);top:10px}
+  .album-dialog{max-height:calc(100dvh - 12px)}
+  .viewer{padding-top:42px;padding-bottom:62px}
+  .viewer-toolbar{bottom:5px}
+}
+@supports not (height:100dvh){
+  @media(max-width:560px){.theme-panel{max-height:calc(100vh - 132px)}.filter-panel{max-height:calc(100vh - 145px)}.album-dialog{max-height:calc(100vh - 16px)}}
+}
+@media(hover:none){
+  .photo-card:hover{transform:none}
+  .photo-card:hover .thumb{transform:none}
+  .button:hover,.settings-button:hover,.sort-trigger:hover{transform:none}
+}
+
 </style>
 </head>
 <body>
@@ -753,9 +868,10 @@ body.fx-ambient a.button.social-chip:hover:not(:disabled){box-shadow:0 7px 18px 
 const DB_NAME='guest-gallery-db', STORE='photos';
 const thumbUrls=new Map();let db, photos=[], visible=[], currentIndex=0, toastTimer;
 // Numéro de version affiché en bas de page : à incrémenter à chaque modification (voir la note en haut du fichier).
-const APP_VERSION='1.17.8';
+const APP_VERSION='1.17.9';
 // ===== PATCH NOTES — voir la consigne en haut du fichier : une nouvelle entrée EN HAUT à chaque nouvelle version =====
 const PATCH_NOTES=[
+ {v:'1.17.9',date:'2026-11-16',fr:{title:'Galerie adaptée aux téléphones',items:['Mise en page mobile revue : en-tête compact, commandes accessibles et contenu ajusté à la largeur de l’écran.','Les photos s’affichent en grille sur téléphone, avec des zones tactiles plus confortables.','Les fenêtres, les paramètres et la visionneuse s’adaptent mieux aux petits écrans et aux zones de sécurité des téléphones.']},en:{title:'Gallery adapted for phones',items:['Mobile layout improved: compact header, accessible controls and content adjusted to the screen width.','Photos display in a phone-friendly grid, with more comfortable touch targets.','Dialogs, settings and the photo viewer better adapt to small screens and phone safe areas.']}},
  {v:'1.17.8',date:'2026-11-16',fr:{title:'Notes internes pour les IA',items:['Aucun changement visible sur le site : les notes cachées dans le code expliquent maintenant à toute IA comment livrer le fichier et publier une mise à jour sur GitHub.','Le dépôt GitHub de la galerie est désormais renseigné dans le fichier.']},en:{title:'Internal notes for AIs',items:['No visible change on the site: the notes hidden in the code now explain to any AI how to deliver the file and publish an update on GitHub.','The gallery’s GitHub repository is now filled in inside the file.']}},
  {v:'1.17.7',date:'2026-11-16',fr:{title:'Fichier nommé BVM_index',items:['Le fichier de la galerie s’appelle désormais BVM_index.html, sans numéro de version dans le nom.','Le bouton de mise à jour ⚙ cherche ce fichier sur GitHub et télécharge la nouvelle version sous ce même nom.']},en:{title:'File named BVM_index',items:['The gallery file is now called BVM_index.html, with no version number in the name.','The ⚙ update button looks for this file on GitHub and downloads the new version under the same name.']}},
  {v:'1.17.6',date:'2026-11-16',fr:{title:'Mises à jour depuis GitHub',items:['Nouvelle catégorie « Mise à jour » dans ⚙ Paramètres : un bouton recherche la dernière version publiée sur GitHub.','S’il y en a une, le bouton devient « Installer la version X » : sur le site en ligne la page se recharge avec la nouvelle version, et si tu ouvres le fichier en local, la nouvelle version se télécharge.','Tes photos et tes réglages ne sont pas touchés par une mise à jour.']},en:{title:'Updates from GitHub',items:['New “Update” category in ⚙ Settings: a button looks for the latest version published on GitHub.','If there is one, the button becomes “Install version X”: on the online site the page reloads with the new version, and if you open the file locally, the new version is downloaded.','Your photos and settings are not touched by an update.']}},
