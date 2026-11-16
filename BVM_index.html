@@ -527,6 +527,7 @@ body.fx-ambient a.button.social-chip:hover:not(:disabled){box-shadow:0 7px 18px 
 .social-add{margin-top:12px}
 @media(max-width:560px){.brand-group{gap:7px}.brand-socials{gap:6px}.brand-socials .button{width:36px;height:36px;border-radius:10px}.brand-socials .button svg{width:17px;height:17px}}
 .social-card{position:relative;z-index:1}
+#askModal .album-confirm-card{position:relative;z-index:1}
 @media(max-width:380px){.brand-socials,.social-links{flex-wrap:wrap}}
 .quota-info{margin-top:4px;font-size:11.5px;color:var(--muted)}
 
@@ -863,14 +864,15 @@ img,video,canvas{max-width:100%}
 </div>
 <div class="toast" id="toast"></div>
 <div class="undo-toast" id="undoToast" role="status"><span id="undoText"></span><button type="button" id="undoBtn" data-i18n="undo">Annuler</button></div>
-<div class="album-confirm" id="askModal" role="dialog" aria-modal="true" aria-labelledby="askText"><div class="album-confirm-card"><p id="askText"></p><div class="album-confirm-actions"><button class="button" id="askCancel" type="button" data-i18n="cancel">Annuler</button><button class="button danger" id="askOk" type="button"></button></div></div></div>
+<div class="album-confirm" id="askModal" role="dialog" aria-modal="true" aria-labelledby="askText"><div class="album-create-glow" id="askGlow" aria-hidden="true"></div><div class="album-confirm-card"><p id="askText"></p><div class="album-confirm-actions"><button class="button" id="askCancel" type="button" data-i18n="cancel">Annuler</button><button class="button danger" id="askOk" type="button"></button></div></div></div>
 <script>
 const DB_NAME='guest-gallery-db', STORE='photos';
 const thumbUrls=new Map();let db, photos=[], visible=[], currentIndex=0, toastTimer;
 // Numéro de version affiché en bas de page : à incrémenter à chaque modification (voir la note en haut du fichier).
-const APP_VERSION='1.17.9';
+const APP_VERSION='1.17.10';
 // ===== PATCH NOTES — voir la consigne en haut du fichier : une nouvelle entrée EN HAUT à chaque nouvelle version =====
 const PATCH_NOTES=[
+ {v:'1.17.10',date:'2026-11-16',fr:{title:'Halo lumineux sur la fenêtre de mise à jour',items:['La fenêtre « Installer la version X ? » reprend l’effet de la création d’album : un halo menthe et turquoise qui pulse autour de la fenêtre, avec des particules qui s’en échappent.','L’effet s’arrête dès que tu cliques sur Installer ou Annuler.']},en:{title:'Glow halo on the update window',items:['The “Install version X?” window now uses the album-creation effect: a pulsing mint and teal halo around the window, with particles drifting away from it.','The effect stops as soon as you click Install or Cancel.']}},
  {v:'1.17.9',date:'2026-11-16',fr:{title:'Galerie adaptée aux téléphones',items:['Mise en page mobile revue : en-tête compact, commandes accessibles et contenu ajusté à la largeur de l’écran.','Les photos s’affichent en grille sur téléphone, avec des zones tactiles plus confortables.','Les fenêtres, les paramètres et la visionneuse s’adaptent mieux aux petits écrans et aux zones de sécurité des téléphones.']},en:{title:'Gallery adapted for phones',items:['Mobile layout improved: compact header, accessible controls and content adjusted to the screen width.','Photos display in a phone-friendly grid, with more comfortable touch targets.','Dialogs, settings and the photo viewer better adapt to small screens and phone safe areas.']}},
  {v:'1.17.8',date:'2026-11-16',fr:{title:'Notes internes pour les IA',items:['Aucun changement visible sur le site : les notes cachées dans le code expliquent maintenant à toute IA comment livrer le fichier et publier une mise à jour sur GitHub.','Le dépôt GitHub de la galerie est désormais renseigné dans le fichier.']},en:{title:'Internal notes for AIs',items:['No visible change on the site: the notes hidden in the code now explain to any AI how to deliver the file and publish an update on GitHub.','The gallery’s GitHub repository is now filled in inside the file.']}},
  {v:'1.17.7',date:'2026-11-16',fr:{title:'Fichier nommé BVM_index',items:['Le fichier de la galerie s’appelle désormais BVM_index.html, sans numéro de version dans le nom.','Le bouton de mise à jour ⚙ cherche ce fichier sur GitHub et télécharge la nouvelle version sous ce même nom.']},en:{title:'File named BVM_index',items:['The gallery file is now called BVM_index.html, with no version number in the name.','The ⚙ update button looks for this file on GitHub and downloads the new version under the same name.']}},
@@ -2537,7 +2539,7 @@ function playAlbumCreateFx(target){
  if(!albumCreateFx.raf){albumCreateFx.last=albumCreateFx.start;albumCreateFx.raf=requestAnimationFrame(albumCreateFxTick)}
 }
 function stopAlbumCreateFx(){
- [$('albumCreateGlow'),$('socialGlow')].forEach(x=>x&&x.classList.remove('play'));clearTimeout(albumCreateFxTimer);albumCreateFx.target=null;$('albumCreateCanvas').style.zIndex='';
+ [$('albumCreateGlow'),$('socialGlow'),$('askGlow')].forEach(x=>x&&x.classList.remove('play'));clearTimeout(albumCreateFxTimer);albumCreateFx.target=null;$('albumCreateCanvas').style.zIndex='';
  albumCreateFx.riseUntil=0;albumCreateFx.parts=[];
  if(albumCreateFx.raf){cancelAnimationFrame(albumCreateFx.raf);albumCreateFx.raf=0}
  const c=$('albumCreateCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
@@ -2566,7 +2568,7 @@ function albumCreateFxTick(now){
  ctx.globalAlpha=1;albumCreateFx.parts=next;
  if(now<albumCreateFx.riseUntil||albumCreateFx.parts.length)albumCreateFx.raf=requestAnimationFrame(albumCreateFxTick);else{albumCreateFx.raf=0;ctx.clearRect(0,0,W,H)}
 }
-window.addEventListener('resize',()=>{if(albumCreateFx.raf)albumCreateFxResize();else if(($('albumModal').classList.contains('open')&&albumModalMode==='create')||$('socialModal').classList.contains('open'))positionAlbumCreateGlow()});
+window.addEventListener('resize',()=>{if(albumCreateFx.raf)albumCreateFxResize();else if(($('albumModal').classList.contains('open')&&albumModalMode==='create')||$('socialModal').classList.contains('open')||$('askModal').classList.contains('open'))positionAlbumCreateGlow()});
 
 // Animation de téléchargement : gros pixels verts qui montent depuis le bas de l'écran (comme les flammes du mode suppression), avec une lueur qui pulse.
 let dlFxTimer=0;
@@ -3200,9 +3202,11 @@ function thumbUrl(p){let c=thumbUrls.get(p.id);if(!c||c.blob!==p.blob){if(c){URL
 function thumbPass(){const ids=new Set(photos.map(p=>p.id));for(const [id,c] of thumbUrls)if(!ids.has(id)){URL.revokeObjectURL(c.full);thumbUrls.delete(id)}}
 new MutationObserver(()=>{thumbPass()}).observe($('gallery'),{childList:true});
 async function updateQuota(){const el=$('quotaInfo');if(!el||!navigator.storage||!navigator.storage.estimate)return;try{const e=await navigator.storage.estimate();if(e.quota)el.textContent=tr('quotaInfo',formatMetricBytes(e.usage||0),formatMetricBytes(e.quota))}catch(err){}}
-let askResolve=null;
-function askConfirm(text,ok){return new Promise(res=>{if(askResolve)askResolve(false);askResolve=res;$('askText').textContent=text;$('askOk').textContent=ok||tr('confirmOk');$('askModal').classList.add('open');$('askOk').focus()})}
-function askDone(v){$('askModal').classList.remove('open');const r=askResolve;askResolve=null;if(r)r(v)}
+let askResolve=null,askFxOn=false;
+function askFxTarget(){return{modal:$('askModal'),dialog:document.querySelector('#askModal .album-confirm-card'),glow:$('askGlow')}}
+// 3e argument « fx » : joue le halo et les particules (même effet que la création d’album) tant que la fenêtre est ouverte.
+function askConfirm(text,ok,fx){return new Promise(res=>{if(askResolve)askResolve(false);if(askFxOn&&!fx){askFxOn=false;stopAlbumCreateFx()}askResolve=res;$('askText').textContent=text;$('askOk').textContent=ok||tr('confirmOk');$('askModal').classList.add('open');if(fx){askFxOn=true;playAlbumCreateFx(askFxTarget())}$('askOk').focus()})}
+function askDone(v){$('askModal').classList.remove('open');if(askFxOn){askFxOn=false;stopAlbumCreateFx()}const r=askResolve;askResolve=null;if(r)r(v)}
 $('askOk').addEventListener('click',()=>askDone(true));$('askCancel').addEventListener('click',()=>askDone(false));
 $('askModal').addEventListener('click',e=>{if(e.target===$('askModal'))askDone(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('askModal').classList.contains('open')){e.stopPropagation();askDone(false)}},true);
@@ -3274,7 +3278,7 @@ async function updCheck(){
 }
 async function updInstall(){
   const v=updState.version,html=updState.html;
-  if(!(await askConfirm(tr('updConfirm',v),tr('updConfirmOk'))))return;
+  if(!(await askConfirm(tr('updConfirm',v),tr('updConfirmOk'),true)))return;
   updState.phase='installing';updUI();
   if(updOnWeb()){
     // Site en ligne : on vérifie que la nouvelle version est bien publiée sur ce site, puis on recharge la page.
