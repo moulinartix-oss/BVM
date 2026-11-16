@@ -25,8 +25,20 @@
   RÈGLE DEMANDÉE PAR L'UTILISATEUR (NOM DES FICHIERS) : le fichier que tu livres s'appelle TOUJOURS BVM_index.html (sans numéro de version dans le nom).
   - C'est aussi le nom du fichier dans le dépôt GitHub (constante UPDATE_FILE) et celui du fichier téléchargé par le bouton de mise à jour. Le numéro de version reste dans APP_VERSION et dans PATCH_NOTES.
   - Quand tu présentes le fichier à l'utilisateur, garde ce nom tel quel.
-  - SYSTÈME DE MISE À JOUR : le bouton « Mise à jour » (⚙ Paramètres) lit APP_VERSION dans BVM_index.html sur GitHub (constante UPDATE_REPO = 'pseudo/depot'). Ne casse pas la ligne const APP_VERSION='X.Y.Z'; : elle est lue par une expression régulière. Mets à jour UPDATE_REPO dès que l'utilisateur donne son pseudo et son dépôt.
 
+  RÈGLE DEMANDÉE PAR L'UTILISATEUR (MISES À JOUR GITHUB) — CONTEXTE ET MARCHE À SUIVRE
+  Contexte : ce n'est PAS un site en ligne. L'utilisateur ouvre ce fichier directement dans son navigateur et l'envoie à quelques amis. Il n'y a aucun serveur.
+  Un bouton « Mise à jour » (⚙ Paramètres, juste au-dessus des Notes de version) permet de se mettre à jour depuis un dépôt GitHub :
+  - Dépôt : github.com/moulinartix-oss/BVM (public, branche main, fichier BVM_index.html à la racine). Constantes UPDATE_REPO='moulinartix-oss/BVM', UPDATE_BRANCH='main', UPDATE_FILE='BVM_index.html' dans le JavaScript, bloc « mises à jour depuis GitHub ».
+  - Fonctionnement : le bouton lit BVM_index.html sur raw.githubusercontent.com, extrait APP_VERSION avec une expression régulière et la compare à la version locale. S'il y en a une plus récente, « Installer la version X » télécharge le nouveau fichier sous le nom BVM_index.html. L'utilisateur remplace alors l'ancien fichier par le nouveau. Les photos restent dans le navigateur (IndexedDB), pas dans le fichier.
+  Ce que tu dois faire à CHAQUE modification demandée :
+    1. renvoyer le fichier COMPLET, nommé BVM_index.html (jamais un extrait, jamais un autre nom) ;
+    2. incrémenter APP_VERSION et ajouter l'entrée FR + EN dans PATCH_NOTES (règles plus haut). Sans nouvelle version, le bouton de mise à jour ne verra rien de nouveau ;
+    3. NE PAS casser la ligne  const APP_VERSION='X.Y.Z';  (la vraie définition, en bas du fichier, au même format : elle est lue par la mise à jour) ;
+    4. NE PAS changer UPDATE_REPO, UPDATE_BRANCH ni UPDATE_FILE sauf si l'utilisateur le demande explicitement. Si l'utilisateur te donne un fichier où ces valeurs sont différentes, garde SES valeurs ;
+    5. ne jamais mettre de photos ni de données personnelles dans le fichier (le dépôt est public) ;
+    6. finir ta réponse par un rappel court : « Pour publier : envoie BVM_index.html sur GitHub (Add file → Upload files, même nom), attends environ 5 minutes, puis les utilisateurs cliquent sur Rechercher une mise à jour dans ⚙ Paramètres. »
+  Publier une mise à jour (fait par l'utilisateur) : dans le dépôt GitHub, Add file → Upload files → glisser le nouveau BVM_index.html (même nom, il remplace l'ancien) → Commit changes. GitHub garde le fichier en cache environ 5 minutes.
 
   VARIANTE GUEST (ce fichier est la version guest de la galerie principale « Mello Gallery »)
   Elle est identique à la principale (mêmes fonctions, textes, notes de version, style, même APP_VERSION), mais elle est vide par défaut
@@ -741,9 +753,10 @@ body.fx-ambient a.button.social-chip:hover:not(:disabled){box-shadow:0 7px 18px 
 const DB_NAME='guest-gallery-db', STORE='photos';
 const thumbUrls=new Map();let db, photos=[], visible=[], currentIndex=0, toastTimer;
 // Numéro de version affiché en bas de page : à incrémenter à chaque modification (voir la note en haut du fichier).
-const APP_VERSION='1.17.7';
+const APP_VERSION='1.17.8';
 // ===== PATCH NOTES — voir la consigne en haut du fichier : une nouvelle entrée EN HAUT à chaque nouvelle version =====
 const PATCH_NOTES=[
+ {v:'1.17.8',date:'2026-11-16',fr:{title:'Notes internes pour les IA',items:['Aucun changement visible sur le site : les notes cachées dans le code expliquent maintenant à toute IA comment livrer le fichier et publier une mise à jour sur GitHub.','Le dépôt GitHub de la galerie est désormais renseigné dans le fichier.']},en:{title:'Internal notes for AIs',items:['No visible change on the site: the notes hidden in the code now explain to any AI how to deliver the file and publish an update on GitHub.','The gallery’s GitHub repository is now filled in inside the file.']}},
  {v:'1.17.7',date:'2026-11-16',fr:{title:'Fichier nommé BVM_index',items:['Le fichier de la galerie s’appelle désormais BVM_index.html, sans numéro de version dans le nom.','Le bouton de mise à jour ⚙ cherche ce fichier sur GitHub et télécharge la nouvelle version sous ce même nom.']},en:{title:'File named BVM_index',items:['The gallery file is now called BVM_index.html, with no version number in the name.','The ⚙ update button looks for this file on GitHub and downloads the new version under the same name.']}},
  {v:'1.17.6',date:'2026-11-16',fr:{title:'Mises à jour depuis GitHub',items:['Nouvelle catégorie « Mise à jour » dans ⚙ Paramètres : un bouton recherche la dernière version publiée sur GitHub.','S’il y en a une, le bouton devient « Installer la version X » : sur le site en ligne la page se recharge avec la nouvelle version, et si tu ouvres le fichier en local, la nouvelle version se télécharge.','Tes photos et tes réglages ne sont pas touchés par une mise à jour.']},en:{title:'Updates from GitHub',items:['New “Update” category in ⚙ Settings: a button looks for the latest version published on GitHub.','If there is one, the button becomes “Install version X”: on the online site the page reloads with the new version, and if you open the file locally, the new version is downloaded.','Your photos and settings are not touched by an update.']}},
  {v:'1.17.5',date:'2026-11-16',fr:{title:'Dossier automatique',items:['Nouvelle catégorie « Dossier automatique » dans ⚙ Paramètres : tu choisis un dossier (par exemple celui des screenshots Minecraft) et toutes les images qu’il contient sont importées dans la galerie.','Ensuite, chaque nouvelle image qui arrive dans ce dossier est importée toute seule, sans rien faire (la galerie doit rester ouverte dans le navigateur).','Les photos que tu supprimes de la galerie ne reviennent pas, et celles déjà présentes ne sont pas dupliquées.','Après avoir fermé puis rouvert le navigateur, un clic sur la page (ou sur « Reconnecter le dossier ») suffit pour réactiver la surveillance si le navigateur redemande l’autorisation.','Fonctionne avec Chrome, Edge et les navigateurs basés sur Chromium (pas Firefox ni Safari).']},en:{title:'Automatic folder',items:['New “Automatic folder” category in ⚙ Settings: pick a folder (for example your Minecraft screenshots) and every image it contains is imported into the gallery.','After that, each new image that lands in this folder is imported by itself, with nothing to do (the gallery has to stay open in the browser).','Photos you delete from the gallery do not come back, and ones already in the gallery are not duplicated.','After closing and reopening the browser, one click on the page (or on “Reconnect folder”) is enough to turn watching back on if the browser asks for permission again.','Works in Chrome, Edge and other Chromium-based browsers (not Firefox or Safari).']}},
@@ -3099,7 +3112,7 @@ async function restoreBackupSettings(t){
 
 // ===== v1.17.6 — mises à jour depuis GitHub =====
 // Dépôt GitHub qui contient la galerie, au format 'pseudo/nom-du-depot'. Laisse vide si le site est sur GitHub Pages (adresse en github.io) : il est alors détecté tout seul.
-const UPDATE_REPO='';
+const UPDATE_REPO='moulinartix-oss/BVM';
 const UPDATE_BRANCH='main';
 const UPDATE_FILE='BVM_index.html';   // nom du fichier de la galerie dans le dépôt
 const UPDATE_DOWNLOAD_NAME=v=>'BVM_index.html';
