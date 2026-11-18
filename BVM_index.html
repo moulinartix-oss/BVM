@@ -67,6 +67,17 @@ body::before{content:"";position:fixed;inset:-3%;z-index:-2;background-image:var
 body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(12,14,17,.78),rgba(12,14,17,.68) 48%,rgba(12,14,17,.86)),linear-gradient(90deg,rgba(10,12,15,.30),transparent 55%,rgba(10,12,15,.25))}
 @keyframes scene-drift{0%{transform:scale(1.04) translate3d(0,0,0)}100%{transform:scale(1.13) translate3d(-1.1%,.7%,0)}}
 @media(prefers-reduced-motion:reduce){body::before{animation:none}}
+/* Fond vivant par défaut : halos de couleur qui dérivent lentement (masqué dès qu'une image/vidéo de fond est choisie) */
+.live-bg{position:fixed;inset:0;z-index:-3;overflow:hidden;pointer-events:none;background:var(--bg)}
+.live-bg i{position:absolute;display:block;width:72vmax;height:72vmax;border-radius:50%;will-change:transform}
+.live-bg i:nth-child(1){left:-18vmax;top:-26vmax;background:radial-gradient(circle,rgba(139,213,165,.62),transparent 66%);animation:blob-a 26s ease-in-out infinite alternate}
+.live-bg i:nth-child(2){right:-26vmax;top:6vh;background:radial-gradient(circle,rgba(79,179,191,.55),transparent 66%);animation:blob-b 34s ease-in-out infinite alternate}
+.live-bg i:nth-child(3){left:14vw;bottom:-40vmax;background:radial-gradient(circle,rgba(123,108,240,.5),transparent 66%);animation:blob-c 41s ease-in-out infinite alternate}
+@keyframes blob-a{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(46vw,34vh,0) scale(1.28)}}
+@keyframes blob-b{0%{transform:translate3d(0,0,0) scale(1.15)}100%{transform:translate3d(-44vw,30vh,0) scale(.9)}}
+@keyframes blob-c{0%{transform:translate3d(0,0,0) scale(.95)}100%{transform:translate3d(38vw,-34vh,0) scale(1.25)}}
+body[style*="--scene-image"] .live-bg,body.custom-video .live-bg{display:none}
+@media(prefers-reduced-motion:reduce){.live-bg i{animation:none}}
 .topbar{height:68px;border-bottom:1px solid #2c2e34;background:rgba(29,31,36,.84);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,4vw,56px);position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
 .brand{display:flex;align-items:center;gap:11px;font-size:18px;font-weight:750;letter-spacing:-.4px}.brandmark{width:40px;height:40px;padding:0;border-radius:50%;background:var(--accent);display:grid;place-items:center;overflow:hidden;color:#18221b;font-weight:900;font-size:17px;border:1px solid #ffffff35;flex:none;position:relative;transition:border-color .18s,transform .18s}.brandmark:hover{border-color:var(--accent);transform:scale(1.05)}.brandmark img{width:100%;height:100%;object-fit:cover;display:block}.brandmark img[hidden]{display:none}.brandmark.has-photo{background:#252a30}.brandmark:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .edit-name{border:1px solid transparent;background:transparent;color:#9aa4b2;border-radius:7px;padding:4px 6px;font-size:15px;line-height:1;opacity:.65;transition:.18s}
@@ -200,6 +211,16 @@ body.intro .album-strip{animation:intro-up .7s cubic-bezier(.2,.7,.25,1) .3s bac
 
 .viewer{display:none;position:fixed;inset:0;background:#050608f7;z-index:30;align-items:center;justify-content:center;padding:36px 28px 82px;overflow:hidden}
 .viewer.open{display:flex}
+.slide-bar{position:absolute;left:0;top:0;width:100%;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;z-index:3;pointer-events:none}
+.slide-bar.run{animation:slide-prog var(--slide-ms,5s) linear forwards}
+@keyframes slide-prog{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.viewer-image.fade-in{animation:viewer-fade .5s ease both}
+@keyframes viewer-fade{from{opacity:0}to{opacity:1}}
+.viewer-toolbar,.viewer-caption{transition:opacity .35s}
+.viewer.idle{cursor:none}.viewer.idle .viewer-toolbar,.viewer.idle .viewer-caption{opacity:0;pointer-events:none}
+.tool-btn[aria-pressed="true"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.slide-sec{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.viewer-image.fade-in{animation:none}}
 .viewer-stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}
 .viewer-image{display:block;max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;border-radius:2px;transform:translate(var(--viewer-x,0px),var(--viewer-y,0px)) scale(var(--viewer-zoom,1));transform-origin:center center;user-select:none;-webkit-user-drag:none;will-change:transform}
 .viewer-image.pixel{image-rendering:pixelated}
@@ -650,6 +671,7 @@ img,video,canvas{max-width:100%}
 </style>
 </head>
 <body>
+<div class="live-bg" aria-hidden="true"><i></i><i></i><i></i></div>
 <video id="backgroundVideo" class="background-video" autoplay muted loop playsinline aria-hidden="true"></video>
 <header class="topbar">
   <div class="brand-group">
@@ -804,6 +826,7 @@ img,video,canvas{max-width:100%}
 </main>
 <div class="drop-overlay" id="dropOverlay"><span data-i18n="dropHere">✦ Dépose tes photos ici ✦</span></div>
 <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Visionneuse photo" data-i18n-attr="aria-label:viewerAria">
+  <div class="slide-bar" id="slideBar"></div>
   <div class="viewer-stage" id="viewerStage">
     <img class="viewer-image" id="viewerImage" alt="">
   </div>
@@ -815,6 +838,11 @@ img,video,canvas{max-width:100%}
     <button class="tool-btn" id="prevPhoto" aria-label="Photo précédente" title="Photo précédente" data-i18n-attr="aria-label:prevPhoto,title:prevPhoto">←</button>
     <span class="viewer-index" id="viewerIndex">1 / 1</span>
     <button class="tool-btn" id="nextPhoto" aria-label="Photo suivante" title="Photo suivante" data-i18n-attr="aria-label:nextPhoto,title:nextPhoto">→</button>
+    <span class="tool-separator"></span>
+    <button class="tool-btn" id="slideBtn" aria-pressed="false">▶</button>
+    <button class="tool-btn slide-sec" id="slideSec">5 s</button>
+    <button class="tool-btn" id="shuffleBtn" aria-pressed="false">⇄</button>
+    <button class="tool-btn" id="fsBtn" aria-pressed="false">⛶</button>
     <span class="tool-separator"></span>
     <button class="tool-btn" id="zoomOut" aria-label="Dézoomer" title="Dézoomer" data-i18n-attr="aria-label:zoomOut,title:zoomOut">⌕−</button>
     <span class="zoom-level" id="zoomLevel" role="button" tabindex="0" title="Revenir à 100 %" data-i18n-attr="title:zoomReset">100%</span>
@@ -871,9 +899,11 @@ img,video,canvas{max-width:100%}
 const DB_NAME='guest-gallery-db', STORE='photos';
 const thumbUrls=new Map();let db, photos=[], visible=[], currentIndex=0, toastTimer;
 // Numéro de version affiché en bas de page : à incrémenter à chaque modification (voir la note en haut du fichier).
-const APP_VERSION='1.17.12';
+const APP_VERSION='1.17.14';
 // ===== PATCH NOTES — voir la consigne en haut du fichier : une nouvelle entrée EN HAUT à chaque nouvelle version =====
 const PATCH_NOTES=[
+ {v:'1.17.14',date:'2026-11-18',fr:{title:'Visionneuse : diaporama et plus',items:['Diaporama automatique : un bouton ▶ passe à la photo suivante tout seul, avec une barre de progression. On l’active ou le désactive à tout moment (touche Espace), et la durée se règle en un clic (3, 5, 8, 12 ou 20 s). Le choix est mémorisé.','Le diaporama attend quand tu zoomes sur une photo, et s’arrête quand l’onglet est caché.','Ordre aléatoire (touche S), plein écran (touche F), touches Début et Fin pour aller à la première ou à la dernière photo.','Balayage gauche/droite au doigt pour changer de photo, fondu entre deux photos, et commandes qui se cachent pendant le diaporama ou en plein écran.']},en:{title:'Viewer: slideshow and more',items:['Automatic slideshow: a ▶ button moves to the next photo by itself, with a progress bar. Turn it on or off any time (Space key); the delay is one click away (3, 5, 8, 12 or 20 s). Your choice is remembered.','The slideshow waits while you are zoomed in and stops when the tab is hidden.','Shuffle (S key), full screen (F key), Home and End keys to jump to the first or last photo.','Swipe left/right to change photo, a fade between photos, and controls that hide during the slideshow or in full screen.']}},
+ {v:'1.17.13',date:'2026-11-18',fr:{title:'Arrière-plan animé',items:['Le fond par défaut est maintenant animé : de grands halos de couleur (vert, turquoise, violet) dérivent lentement derrière la galerie.','Il disparaît automatiquement si tu choisis une image ou une vidéo de fond, et reste immobile si ton système demande de réduire les animations.']},en:{title:'Animated background',items:['The default background is now animated: large colour glows (green, teal, purple) slowly drift behind the gallery.','It switches off automatically when you pick a background image or video, and stays still if your system asks for reduced motion.']}},
  {v:'1.17.12',date:'2026-11-18',fr:{title:'Icône de la galerie',items:['La galerie a maintenant sa propre icône (le cristal rouge et orange) dans l’onglet du navigateur et pour les raccourcis.']},en:{title:'Gallery icon',items:['The gallery now has its own icon (the red and orange crystal) in the browser tab and for shortcuts.']}},
  {v:'1.17.11',date:'2026-11-18',fr:{title:'Nom par défaut : « You »',items:['Le nom affiché en haut est maintenant « You » au lieu de « Guest », et la photo de profil par défaut affiche un « Y ».']},en:{title:'Default name: “You”',items:['The name shown at the top is now “You” instead of “Guest”, and the default profile circle shows a “Y”.']}},
  {v:'1.17.10',date:'2026-11-16',fr:{title:'Halo lumineux sur la fenêtre de mise à jour',items:['La fenêtre « Installer la version X ? » reprend l’effet de la création d’album : un halo menthe et turquoise qui pulse autour de la fenêtre, avec des particules qui s’en échappent.','L’effet s’arrête dès que tu cliques sur Installer ou Annuler.']},en:{title:'Glow halo on the update window',items:['The “Install version X?” window now uses the album-creation effect: a pulsing mint and teal halo around the window, with particles drifting away from it.','The effect stops as soon as you click Install or Cancel.']}},
@@ -1650,6 +1680,8 @@ let lang='fr';
 try{const savedLang=localStorage.getItem(LANG_KEY);if(savedLang==='fr'||savedLang==='en')lang=savedLang}catch(e){}
 let dateFmt=new Intl.DateTimeFormat(LOCALES[lang],dateFmtOpts);
 // tr('clé', ...arguments) : renvoie le texte dans la langue choisie (ou en français si la clé manque)
+Object.assign(I18N.fr,{slidePlay:'Lancer le diaporama (espace)',slidePause:'Mettre le diaporama en pause (espace)',slideSec:'Durée par photo',shufT:'Ordre aléatoire (S)',fsT:'Plein écran (F)',slideOnT:'Diaporama activé',slideOffT:'Diaporama désactivé',shufOnT:'Ordre aléatoire activé',shufOffT:'Ordre normal'});
+Object.assign(I18N.en,{slidePlay:'Start slideshow (space)',slidePause:'Pause slideshow (space)',slideSec:'Time per photo',shufT:'Shuffle (S)',fsT:'Full screen (F)',slideOnT:'Slideshow on',slideOffT:'Slideshow off',shufOnT:'Shuffle on',shufOffT:'Normal order'});
 function tr(key,...args){const v=I18N[lang]&&I18N[lang][key]!==undefined?I18N[lang][key]:I18N.fr[key];if(v===undefined)return key;return typeof v==='function'?v(...args):v}
 const pctLabel=v=>lang==='fr'?v+' %':v+'%';
 function applyStaticLang(){
@@ -1662,7 +1694,7 @@ function applyStaticLang(){
 // Rafraîchit tout ce qui est écrit par le JavaScript quand on change de langue
 function refreshLang(){
   applyStaticLang();
-  renderSwatches();applyAccent();
+  renderSwatches();applyAccent();try{updateSlideUi()}catch(e){}
   render();
   refreshCompactFilterLabels();refreshAlbumSelectUIs();try{renderSocial()}catch(e){}updateQuota();
   setSortValue($('sort').value);
@@ -2054,9 +2086,12 @@ function openViewer(index){
  $('viewerTitle').textContent=p.name;$('viewerDate').textContent=dateFmt.format(new Date(p.date));
  $('viewerIndex').textContent=`${currentIndex+1} / ${visible.length}`;if(!wasOpen)viewerZoomFrom(p.id);
  viewerZoom=1;viewerX=0;viewerY=0;updateZoom();if(!$('viewer').classList.contains('open'))sfx.open();$('viewer').classList.add('open');
+ const vim=$('viewerImage');vim.classList.remove('fade-in');if(wasOpen){void vim.offsetWidth;vim.classList.add('fade-in')}
+ try{slideArm();wake()}catch(e){}
 }
 function stepViewer(n){openViewer(currentIndex+n)}
 function closeViewer(){
+ try{slideStop();if(document.fullscreenElement)document.exitFullscreen();$('viewer').classList.remove('idle')}catch(e){}
  $('viewer').classList.remove('open');
  if(viewerObjectUrl){URL.revokeObjectURL(viewerObjectUrl);viewerObjectUrl=null}
  $('viewerImage').removeAttribute('src');
@@ -2760,6 +2795,59 @@ document.addEventListener('click',e=>{if(!$('sortMenu').contains(e.target))close
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSortMenu()});
 $('closeViewer').onclick=closeViewer;
 $('viewerDownload').onclick=()=>{const p=visible[currentIndex];if(p)downloadPhoto(p)};
+// ===== Visionneuse : diaporama automatique, aléatoire, plein écran, balayage =====
+const SLIDE_KEY='bvm-viewer-slide',SLIDE_SECS=[3,5,8,12,20];
+let slide={on:false,sec:5,shuffle:false},slideT=0,idleT=0;
+try{const v=JSON.parse(localStorage.getItem(SLIDE_KEY)||'null');if(v){slide.on=!!v.on;slide.shuffle=!!v.shuffle;if(SLIDE_SECS.includes(v.sec))slide.sec=v.sec}}catch(e){}
+const saveSlide=()=>{try{localStorage.setItem(SLIDE_KEY,JSON.stringify(slide))}catch(e){}};
+function updateSlideUi(){
+ const b=$('slideBtn');b.textContent=slide.on?'❚❚':'▶';b.setAttribute('aria-pressed',String(slide.on));
+ b.title=b.ariaLabel=tr(slide.on?'slidePause':'slidePlay');
+ $('slideSec').textContent=slide.sec+' s';$('slideSec').title=tr('slideSec');
+ $('shuffleBtn').setAttribute('aria-pressed',String(slide.shuffle));$('shuffleBtn').title=tr('shufT');
+ $('fsBtn').title=tr('fsT');$('fsBtn').hidden=!document.fullscreenEnabled;
+}
+function slideStop(){clearTimeout(slideT);slideT=0;$('slideBar').classList.remove('run')}
+function slideArm(){
+ slideStop();
+ const v=$('viewer');if(!slide.on||!v.classList.contains('open')||document.hidden)return;
+ v.style.setProperty('--slide-ms',slide.sec*1000+'ms');
+ void $('slideBar').offsetWidth;$('slideBar').classList.add('run');
+ slideT=setTimeout(()=>{
+  if(viewerZoom>1.001){slideArm();return}
+  if(slide.shuffle&&visible.length>1){let i;do{i=Math.floor(Math.random()*visible.length)}while(i===currentIndex);openViewer(i)}
+  else stepViewer(1);
+ },slide.sec*1000);
+}
+function wake(){
+ const v=$('viewer');v.classList.remove('idle');clearTimeout(idleT);
+ if(v.classList.contains('open')&&(slide.on||document.fullscreenElement))idleT=setTimeout(()=>v.classList.add('idle'),2500);
+}
+function toggleSlide(){slide.on=!slide.on;saveSlide();updateSlideUi();slideArm();wake();toast(tr(slide.on?'slideOnT':'slideOffT'))}
+function toggleShuffle(){slide.shuffle=!slide.shuffle;saveSlide();updateSlideUi();toast(tr(slide.shuffle?'shufOnT':'shufOffT'))}
+function cycleSlideSec(){slide.sec=SLIDE_SECS[(SLIDE_SECS.indexOf(slide.sec)+1)%SLIDE_SECS.length];saveSlide();updateSlideUi();slideArm()}
+function toggleFs(){const v=$('viewer');if(document.fullscreenElement)document.exitFullscreen();else if(v.requestFullscreen)v.requestFullscreen().catch(()=>{})}
+$('slideBtn').onclick=toggleSlide;$('shuffleBtn').onclick=toggleShuffle;$('slideSec').onclick=cycleSlideSec;$('fsBtn').onclick=toggleFs;
+document.addEventListener('fullscreenchange',()=>{$('fsBtn').setAttribute('aria-pressed',String(!!document.fullscreenElement));wake()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)slideStop();else slideArm()});
+['pointermove','pointerdown'].forEach(ev=>$('viewer').addEventListener(ev,wake));
+document.addEventListener('keydown',e=>{
+ if(!$('viewer').classList.contains('open')||e.ctrlKey||e.metaKey||e.altKey)return;
+ wake();
+ if(e.code==='Space'){e.preventDefault();toggleSlide()}
+ else if(e.key==='f'||e.key==='F')toggleFs();
+ else if(e.key==='s'||e.key==='S')toggleShuffle();
+ else if(e.key==='Home'){e.preventDefault();openViewer(0)}
+ else if(e.key==='End'){e.preventDefault();openViewer(visible.length-1)}
+});
+let swipe=null;
+$('viewerStage').addEventListener('pointerdown',e=>{swipe=(vptrs.size===1&&viewerZoom<=1.001)?{id:e.pointerId,x:e.clientX,y:e.clientY}:null});
+$('viewerStage').addEventListener('pointerup',e=>{
+ if(!swipe||e.pointerId!==swipe.id)return;
+ const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;
+ if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)stepViewer(dx<0?1:-1);
+});
+updateSlideUi();
 $('prevPhoto').onclick=()=>stepViewer(-1);$('nextPhoto').onclick=()=>stepViewer(1);
 $('zoomOut').onclick=()=>changeZoom(-.25);$('zoomIn').onclick=()=>changeZoom(.25);
 $('openOriginal').onclick=()=>{const p=visible[currentIndex];if(p){const a=document.createElement('a');a.href=viewerObjectUrl;a.target='_blank';a.rel='noopener';a.click()}};
