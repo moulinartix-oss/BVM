@@ -550,7 +550,7 @@ body.fx-ambient a.button.social-chip:hover:not(:disabled){box-shadow:0 7px 18px 
 .social-add{margin-top:12px}
 @media(max-width:560px){.brand-group{gap:7px}.brand-socials{gap:6px}.brand-socials .button{width:36px;height:36px;border-radius:10px}.brand-socials .button svg{width:17px;height:17px}}
 .social-card{position:relative;z-index:1}
-#askModal .album-confirm-card{position:relative;z-index:1}
+#askModal .album-confirm-card,#keysModal .album-confirm-card{position:relative;z-index:1}
 @media(max-width:380px){.brand-socials,.social-links{flex-wrap:wrap}}
 .quota-info{margin-top:4px;font-size:11.5px;color:var(--muted)}
 
@@ -668,6 +668,21 @@ img,video,canvas{max-width:100%}
   .button:hover,.settings-button:hover,.sort-trigger:hover{transform:none}
 }
 
+
+/* v1.17.15 : infos de la photo, taille des vignettes, raccourcis clavier */
+.viewer-info{position:absolute;right:22px;top:18px;width:min(290px,62vw);padding:12px 14px;background:#25272deF;border:1px solid #454951;border-radius:15px;box-shadow:0 8px 30px #0008;transition:opacity .35s;z-index:2}
+.viewer-info[hidden]{display:none}
+.viewer.idle .viewer-info{opacity:0;pointer-events:none}
+.viewer-info h4{margin:0 0 8px;font-size:10px;letter-spacing:1.6px;font-weight:850;color:var(--accent)}
+.viewer-info dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12px}
+.viewer-info dt{color:#98a2af}.viewer-info dd{margin:0;color:#e7ebef;font-weight:600;text-align:right;overflow-wrap:anywhere}
+.tool-btn[aria-pressed="true"]#infoBtn{background:color-mix(in srgb,var(--accent) 18%,#25272d);color:var(--accent)}
+@media(max-width:560px){.viewer-info{top:auto;left:10px;right:10px;width:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px))}}
+.keys-list{padding:8px 20px 18px;overflow-y:auto;display:grid;gap:2px}
+.keys-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid #2e3138;font-size:13px;color:#e7ebef}
+.keys-row:last-child{border-bottom:0}
+.keys-row span:last-child{display:flex;gap:5px;flex:none}
+.keys-row kbd{min-width:26px;padding:3px 8px;border:1px solid #4b5360;border-bottom-width:2px;border-radius:7px;background:#2a2d34;color:var(--accent);font:650 12px/1.3 inherit;text-align:center}
 </style>
 </head>
 <body>
@@ -754,6 +769,10 @@ img,video,canvas{max-width:100%}
           </div>
         </div>
         <div class="sound-section">
+          <div class="theme-panel-heading" data-i18n="hHelp">AIDE</div>
+          <button type="button" class="theme-custom-button" id="keysBtn" style="margin-top:8px"><span class="custom-pencil">⌨</span><span class="custom-copy"><strong data-i18n="keysBtnTitle">Raccourcis clavier</strong><small data-i18n="keysBtnSub">Toutes les touches utiles (aussi avec ?)</small></span></button>
+        </div>
+        <div class="sound-section">
           <div class="theme-panel-heading" data-i18n="hSocial">MES RÉSEAUX</div>
           <button type="button" class="remove-custom-background" id="resetSocial" data-i18n="socResetBtn" disabled>Réinitialiser les réseaux</button>
         </div>
@@ -834,6 +853,7 @@ img,video,canvas{max-width:100%}
     <div class="viewer-title" id="viewerTitle"></div>
     <div class="viewer-date" id="viewerDate"></div>
   </div>
+  <div class="viewer-info" id="viewerInfo" hidden></div>
   <div class="viewer-toolbar" role="toolbar" aria-label="Commandes de la photo" data-i18n-attr="aria-label:viewerTools">
     <button class="tool-btn" id="prevPhoto" aria-label="Photo précédente" title="Photo précédente" data-i18n-attr="aria-label:prevPhoto,title:prevPhoto">←</button>
     <span class="viewer-index" id="viewerIndex">1 / 1</span>
@@ -848,6 +868,7 @@ img,video,canvas{max-width:100%}
     <span class="zoom-level" id="zoomLevel" role="button" tabindex="0" title="Revenir à 100 %" data-i18n-attr="title:zoomReset">100%</span>
     <button class="tool-btn" id="zoomIn" aria-label="Zoomer" title="Zoomer" data-i18n-attr="aria-label:zoomIn,title:zoomIn">⌕+</button>
     <span class="tool-separator"></span>
+    <button class="tool-btn" id="infoBtn" aria-pressed="false" aria-label="Infos de la photo (I)" title="Infos de la photo (I)" data-i18n-attr="aria-label:infoT,title:infoT">ⓘ</button>
     <button class="tool-btn" id="viewerDownload" aria-label="Télécharger" title="Télécharger" data-i18n-attr="aria-label:download,title:download"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 11 12 15.5 16.5 11M5 20h14"/></svg></button>
     <button class="tool-btn" id="openOriginal" aria-label="Ouvrir l'image originale" title="Ouvrir l'image originale" data-i18n-attr="aria-label:openOriginal,title:openOriginal">↗</button>
     <button class="tool-btn close-tool" id="closeViewer" aria-label="Fermer" title="Fermer" data-i18n-attr="aria-label:close,title:close">×</button>
@@ -866,6 +887,7 @@ img,video,canvas{max-width:100%}
     <div class="album-dialog-foot"><div class="album-selection-info"><span class="album-selection-count" id="albumSelectionCount">0 photo sélectionnée</span><div class="album-name-error" id="albumPhotoError" data-i18n="albumPhotoErrCreate" hidden>Choisis au moins une photo pour créer ton album.</div></div><div class="actions"><button class="button" id="cancelAlbumBtn" type="button" data-i18n="cancel">Annuler</button><button class="button primary" type="submit">Créer l’album</button></div></div>
   </form>
 </div>
+<div class="album-confirm" id="keysModal" role="dialog" aria-modal="true" aria-labelledby="keysTitle"><div class="album-create-glow" id="keysGlow" aria-hidden="true"></div><div class="album-confirm-card patch-card"><div class="patch-head"><div><h3 id="keysTitle" data-i18n="keysBtnTitle">Raccourcis clavier</h3></div><button class="button icon-btn" id="keysCloseBtn" type="button" aria-label="Fermer" title="Fermer" data-i18n-attr="aria-label:close,title:close">✕</button></div><div class="keys-list" id="keysList"></div></div></div>
 <div class="album-confirm" id="patchModal" role="dialog" aria-modal="true" aria-labelledby="patchTitle"><div class="album-confirm-card patch-card"><div class="patch-head"><div><h3 id="patchTitle" data-i18n="patchBtn">Notes de version</h3><small id="patchCurrent"></small></div><button class="button icon-btn" id="patchCloseBtn" type="button" aria-label="Fermer" title="Fermer" data-i18n-attr="aria-label:close,title:close">✕</button></div><div class="patch-list" id="patchList"></div></div></div>
 <div class="album-confirm" id="albumActionsModal" role="dialog" aria-modal="true" aria-labelledby="albumActionsTitle"><div class="album-confirm-card"><h3 id="albumActionsTitle" data-i18n="albActionsTitle">Modifier l’album</h3><p id="albumActionsText">Que souhaites-tu modifier ?</p><div class="album-action-buttons"><button class="button" id="renameAlbumAction" type="button" data-i18n="albRename">✎　Modifier le nom</button><button class="button" id="addPhotosAlbumAction" type="button" data-i18n="albAddPhotos">＋　Ajouter des photos</button><button class="button" id="cancelAlbumActions" type="button" data-i18n="cancel">Annuler</button></div></div></div>
 <div class="album-confirm" id="renameModal" role="dialog" aria-modal="true" aria-labelledby="renameTitle"><form class="album-confirm-card rename-form" id="renameForm"><h3 id="renameTitle" data-i18n="renTitle">Renommer la photo</h3><p data-i18n="renHint">Le nom du fichier change aussi : tu pourras la retrouver avec la recherche.</p><input class="album-name" id="renameInput" type="text" maxlength="80" autocomplete="off" aria-label="Nom de la photo" data-i18n-attr="aria-label:renLabel"><div class="album-name-error" id="renameError" data-i18n="renErr" hidden>Donne un nom à ta photo pour continuer.</div><div class="album-confirm-actions"><button class="button" id="cancelRename" type="button" data-i18n="cancel">Annuler</button><button class="button primary" type="submit" data-i18n="save">Enregistrer</button></div></form></div>
@@ -899,9 +921,12 @@ img,video,canvas{max-width:100%}
 const DB_NAME='guest-gallery-db', STORE='photos';
 const thumbUrls=new Map();let db, photos=[], visible=[], currentIndex=0, toastTimer;
 // Numéro de version affiché en bas de page : à incrémenter à chaque modification (voir la note en haut du fichier).
-const APP_VERSION='1.17.14';
+const APP_VERSION='1.17.17';
 // ===== PATCH NOTES — voir la consigne en haut du fichier : une nouvelle entrée EN HAUT à chaque nouvelle version =====
 const PATCH_NOTES=[
+ {v:'1.17.17',date:'2026-11-20',fr:{title:'Sélection par glissement et lueur sur les raccourcis',items:['Mode suppression : tu peux maintenant rester appuyé sur la souris et la faire glisser au-dessus des photos pour les sélectionner d’un coup, sans cliquer sur chacune.','Si tu commences sur une photo déjà sélectionnée, le glisser les désélectionne à la place. La grille défile toute seule quand tu approches du haut ou du bas de l’écran.','Les photos épinglées restent protégées pendant le glissement. Sur écran tactile, un simple toucher sélectionne toujours une photo à la fois.','La fenêtre « Raccourcis clavier » reprend la lueur menthe et turquoise de l’album et de « Mes réseaux » : un halo qui pulse autour de la fenêtre, avec des particules qui s’en échappent.']},en:{title:'Drag to select and glow on shortcuts',items:['Delete mode: you can now hold the mouse button and drag over photos to select several at once, without clicking each one.','If you start on an already selected photo, dragging unselects them instead. The grid scrolls by itself when you get near the top or bottom of the screen.','Pinned photos stay protected while dragging. On touch screens, a simple tap still selects one photo at a time.','The “Keyboard shortcuts” window now uses the mint and teal glow from the album and “My socials” windows: a pulsing halo around the window, with particles drifting away from it.']}},
+ {v:'1.17.16',date:'2026-11-20',fr:{title:'Retrait du réglage de taille des vignettes',items:['Le réglage « Affichage » (vignettes petites, moyennes ou grandes) est retiré : la grille garde son affichage d’origine.','Les infos de la photo (ⓘ / touche I) et les raccourcis clavier (touche ?) restent disponibles.']},en:{title:'Thumbnail size setting removed',items:['The “Display” setting (small, medium or large thumbnails) has been removed: the grid keeps its original layout.','Photo info (ⓘ / I key) and keyboard shortcuts (? key) are still available.']}},
+ {v:'1.17.15',date:'2026-11-20',fr:{title:'Infos de la photo, taille des vignettes et raccourcis',items:['Visionneuse : un bouton ⓘ (ou la touche I) affiche les infos de la photo : nom, dimensions, poids, format, date d’ajout et albums.','Nouveau réglage « Affichage » dans ⚙ Paramètres : vignettes petites, moyennes ou grandes (sur ordinateur). Le choix est mémorisé.','Nouvelle fenêtre « Raccourcis clavier » (bouton dans ⚙ Paramètres, ou touche ?) qui liste toutes les touches utiles.']},en:{title:'Photo info, thumbnail size and shortcuts',items:['Viewer: an ⓘ button (or the I key) shows the photo details: name, dimensions, file size, format, date added and albums.','New “Display” setting in ⚙ Settings: small, medium or large thumbnails (on desktop). Your choice is remembered.','New “Keyboard shortcuts” window (button in ⚙ Settings, or the ? key) listing all the useful keys.']}},
  {v:'1.17.14',date:'2026-11-18',fr:{title:'Visionneuse : diaporama et plus',items:['Diaporama automatique : un bouton ▶ passe à la photo suivante tout seul, avec une barre de progression. On l’active ou le désactive à tout moment (touche Espace), et la durée se règle en un clic (3, 5, 8, 12 ou 20 s). Le choix est mémorisé.','Le diaporama attend quand tu zoomes sur une photo, et s’arrête quand l’onglet est caché.','Ordre aléatoire (touche S), plein écran (touche F), touches Début et Fin pour aller à la première ou à la dernière photo.','Balayage gauche/droite au doigt pour changer de photo, fondu entre deux photos, et commandes qui se cachent pendant le diaporama ou en plein écran.']},en:{title:'Viewer: slideshow and more',items:['Automatic slideshow: a ▶ button moves to the next photo by itself, with a progress bar. Turn it on or off any time (Space key); the delay is one click away (3, 5, 8, 12 or 20 s). Your choice is remembered.','The slideshow waits while you are zoomed in and stops when the tab is hidden.','Shuffle (S key), full screen (F key), Home and End keys to jump to the first or last photo.','Swipe left/right to change photo, a fade between photos, and controls that hide during the slideshow or in full screen.']}},
  {v:'1.17.13',date:'2026-11-18',fr:{title:'Arrière-plan animé',items:['Le fond par défaut est maintenant animé : de grands halos de couleur (vert, turquoise, violet) dérivent lentement derrière la galerie.','Il disparaît automatiquement si tu choisis une image ou une vidéo de fond, et reste immobile si ton système demande de réduire les animations.']},en:{title:'Animated background',items:['The default background is now animated: large colour glows (green, teal, purple) slowly drift behind the gallery.','It switches off automatically when you pick a background image or video, and stays still if your system asks for reduced motion.']}},
  {v:'1.17.12',date:'2026-11-18',fr:{title:'Icône de la galerie',items:['La galerie a maintenant sa propre icône (le cristal rouge et orange) dans l’onglet du navigateur et pour les raccourcis.']},en:{title:'Gallery icon',items:['The gallery now has its own icon (the red and orange crystal) in the browser tab and for shortcuts.']}},
@@ -1682,6 +1707,8 @@ let dateFmt=new Intl.DateTimeFormat(LOCALES[lang],dateFmtOpts);
 // tr('clé', ...arguments) : renvoie le texte dans la langue choisie (ou en français si la clé manque)
 Object.assign(I18N.fr,{slidePlay:'Lancer le diaporama (espace)',slidePause:'Mettre le diaporama en pause (espace)',slideSec:'Durée par photo',shufT:'Ordre aléatoire (S)',fsT:'Plein écran (F)',slideOnT:'Diaporama activé',slideOffT:'Diaporama désactivé',shufOnT:'Ordre aléatoire activé',shufOffT:'Ordre normal'});
 Object.assign(I18N.en,{slidePlay:'Start slideshow (space)',slidePause:'Pause slideshow (space)',slideSec:'Time per photo',shufT:'Shuffle (S)',fsT:'Full screen (F)',slideOnT:'Slideshow on',slideOffT:'Slideshow off',shufOnT:'Shuffle on',shufOffT:'Normal order'});
+Object.assign(I18N.fr,{hHelp:'AIDE',keysBtnTitle:'Raccourcis clavier',keysBtnSub:'Toutes les touches utiles (aussi avec ?)',infoT:'Infos de la photo (I)',infoName:'Nom',infoDims:'Dimensions',infoSize:'Poids',infoFormat:'Format',infoAdded:'Ajoutée le',infoAlbums:'Albums',infoNone:'Aucun',infoHead:'INFOS',kNav:'Photo précédente / suivante',kSlide:'Lancer / pause du diaporama',kShuf:'Ordre aléatoire',kFs:'Plein écran',kZoom:'Zoomer / dézoomer / 100 %',kEnds:'Première / dernière photo',kInfo:'Infos de la photo',kClose:'Fermer la visionneuse',kHelp:'Afficher cette aide'});
+Object.assign(I18N.en,{hHelp:'HELP',keysBtnTitle:'Keyboard shortcuts',keysBtnSub:'All the useful keys (also with ?)',infoT:'Photo info (I)',infoName:'Name',infoDims:'Dimensions',infoSize:'File size',infoFormat:'Format',infoAdded:'Added on',infoAlbums:'Albums',infoNone:'None',infoHead:'INFO',kNav:'Previous / next photo',kSlide:'Start / pause slideshow',kShuf:'Shuffle',kFs:'Full screen',kZoom:'Zoom in / out / 100%',kEnds:'First / last photo',kInfo:'Photo info',kClose:'Close the viewer',kHelp:'Show this help'});
 function tr(key,...args){const v=I18N[lang]&&I18N[lang][key]!==undefined?I18N[lang][key]:I18N.fr[key];if(v===undefined)return key;return typeof v==='function'?v(...args):v}
 const pctLabel=v=>lang==='fr'?v+' %':v+'%';
 function applyStaticLang(){
@@ -1702,6 +1729,7 @@ function refreshLang(){
   if($('patchModal').classList.contains('open'))renderPatchNotes();
   try{watchUI()}catch(e){}
   try{updUI()}catch(e){}
+  try{if($('keysModal').classList.contains('open')){renderKeys();if(keysFxOn)requestAnimationFrame(positionAlbumCreateGlow)}renderViewerInfo()}catch(e){}
   if($('viewer').classList.contains('open')&&visible[currentIndex])$('viewerDate').textContent=dateFmt.format(new Date(visible[currentIndex].date));
 }
 function setLang(next){
@@ -2578,7 +2606,7 @@ function playAlbumCreateFx(target){
  if(!albumCreateFx.raf){albumCreateFx.last=albumCreateFx.start;albumCreateFx.raf=requestAnimationFrame(albumCreateFxTick)}
 }
 function stopAlbumCreateFx(){
- [$('albumCreateGlow'),$('socialGlow'),$('askGlow')].forEach(x=>x&&x.classList.remove('play'));clearTimeout(albumCreateFxTimer);albumCreateFx.target=null;$('albumCreateCanvas').style.zIndex='';
+ [$('albumCreateGlow'),$('socialGlow'),$('askGlow'),$('keysGlow')].forEach(x=>x&&x.classList.remove('play'));clearTimeout(albumCreateFxTimer);albumCreateFx.target=null;$('albumCreateCanvas').style.zIndex='';
  albumCreateFx.riseUntil=0;albumCreateFx.parts=[];
  if(albumCreateFx.raf){cancelAnimationFrame(albumCreateFx.raf);albumCreateFx.raf=0}
  const c=$('albumCreateCanvas');const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
@@ -2607,7 +2635,7 @@ function albumCreateFxTick(now){
  ctx.globalAlpha=1;albumCreateFx.parts=next;
  if(now<albumCreateFx.riseUntil||albumCreateFx.parts.length)albumCreateFx.raf=requestAnimationFrame(albumCreateFxTick);else{albumCreateFx.raf=0;ctx.clearRect(0,0,W,H)}
 }
-window.addEventListener('resize',()=>{if(albumCreateFx.raf)albumCreateFxResize();else if(($('albumModal').classList.contains('open')&&albumModalMode==='create')||$('socialModal').classList.contains('open')||$('askModal').classList.contains('open'))positionAlbumCreateGlow()});
+window.addEventListener('resize',()=>{if(albumCreateFx.raf)albumCreateFxResize();else if(($('albumModal').classList.contains('open')&&albumModalMode==='create')||$('socialModal').classList.contains('open')||$('askModal').classList.contains('open')||$('keysModal').classList.contains('open'))positionAlbumCreateGlow()});
 
 // Animation de téléchargement : gros pixels verts qui montent depuis le bas de l'écran (comme les flammes du mode suppression), avec une lueur qui pulse.
 let dlFxTimer=0;
@@ -2732,6 +2760,50 @@ document.addEventListener('click',e=>{if(!$('moreMenu').contains(e.target)&&!e.t
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('moreMenu').hidden){const b=moreMenuBtn;closeMoreMenu();if(b)b.focus()}});
 window.addEventListener('scroll',closeMoreMenu,{passive:true});
 window.addEventListener('resize',closeMoreMenu);
+// Mode suppression : maintenir le clic et glisser la souris pour sélectionner (ou désélectionner) plusieurs photos d’un coup.
+const dragSel={on:false,want:true,lastId:null,x:0,y:0,px:0,py:0,block:false,raf:0};
+function dragSelApply(id){
+  if(!id||id===dragSel.lastId)return;dragSel.lastId=id;
+  const p=photos.find(x=>x.id===id);if(!p||p.pinned)return;
+  if(selected.has(id)===dragSel.want)return;
+  toggleSelect(id);
+}
+function dragSelAt(x,y){const el=document.elementFromPoint(x,y),c=el&&el.closest?el.closest('#gallery .photo-card'):null;if(c)dragSelApply(c.dataset.id)}
+function dragSelMove(x,y){
+  const dx=x-dragSel.px,dy=y-dragSel.py,steps=Math.min(40,Math.ceil(Math.hypot(dx,dy)/12));
+  for(let i=1;i<=steps;i++)dragSelAt(dragSel.px+dx*i/steps,dragSel.py+dy*i/steps);
+  dragSel.px=x;dragSel.py=y;
+}
+function dragSelScroll(){
+  if(!dragSel.on){dragSel.raf=0;return}
+  const edge=70,y=dragSel.y;let v=0;
+  if(y<edge)v=-Math.ceil((edge-y)/5);else if(y>innerHeight-edge)v=Math.ceil((y-(innerHeight-edge))/5);
+  if(v){window.scrollBy(0,v);dragSelAt(dragSel.x,dragSel.y)}
+  dragSel.raf=requestAnimationFrame(dragSelScroll);
+}
+function dragSelEnd(){
+  if(!dragSel.on)return;dragSel.on=false;dragSel.lastId=null;
+  if(dragSel.raf){cancelAnimationFrame(dragSel.raf);dragSel.raf=0}
+  document.body.style.userSelect='';
+  setTimeout(()=>{dragSel.block=false},0);
+}
+$('gallery').addEventListener('pointerdown',e=>{
+  if(!selectMode||e.pointerType==='touch'||e.button!==0)return;
+  const c=e.target.closest&&e.target.closest('.photo-card');if(!c)return;
+  e.preventDefault();
+  dragSel.on=true;dragSel.block=true;dragSel.lastId=null;
+  dragSel.want=!selected.has(c.dataset.id);
+  dragSel.x=dragSel.px=e.clientX;dragSel.y=dragSel.py=e.clientY;
+  const pp=photos.find(x=>x.id===c.dataset.id);
+  if(pp&&pp.pinned){toast(tr('pinnedNoSelect'));dragSel.lastId=c.dataset.id}
+  else dragSelApply(c.dataset.id);
+  document.body.style.userSelect='none';
+  if(!dragSel.raf)dragSel.raf=requestAnimationFrame(dragSelScroll);
+});
+window.addEventListener('pointermove',e=>{if(!dragSel.on)return;if(!selectMode||!(e.buttons&1)){dragSelEnd();return}dragSel.x=e.clientX;dragSel.y=e.clientY;dragSelMove(e.clientX,e.clientY)});
+window.addEventListener('pointerup',dragSelEnd);window.addEventListener('pointercancel',dragSelEnd);window.addEventListener('blur',dragSelEnd);
+$('gallery').addEventListener('click',e=>{if(dragSel.block){e.stopPropagation();e.preventDefault()}},true);
+$('gallery').addEventListener('dragstart',e=>{if(selectMode)e.preventDefault()});
 $('gallery').addEventListener('click',async e=>{if(selectMode){const c=e.target.closest('[data-id]');if(c)toggleSelect(c.dataset.id);return}const ren=e.target.closest('[data-rename]');if(ren){e.stopPropagation();openRename(ren.dataset.rename);return}const pin=e.target.closest('[data-pin]');if(pin){e.stopPropagation();const p=photos.find(x=>x.id===pin.dataset.pin);if(p){p.pinned=!p.pinned;try{await savePhoto(p)}catch(err){p.pinned=!p.pinned;toast(tr('pinSaveFail'));return}render();toast(p.pinned?tr('pinnedToast'):tr('unpinnedToast'));sfx.pin(p.pinned)}return}const more=e.target.closest('[data-more]');if(more){e.stopPropagation();toggleMoreMenu(more);return}const card=e.target.closest('[data-id]');if(card)openViewer(visible.findIndex(p=>p.id===card.dataset.id))});
 $('gallery').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.photo-card')){e.preventDefault();if(selectMode)toggleSelect(e.target.dataset.id);else openViewer(visible.findIndex(p=>p.id===e.target.dataset.id))}});
 $('search').oninput=render;$('sort').onchange=render;
@@ -3390,6 +3462,46 @@ async function updInstall(){
 }
 $('updateBtn').addEventListener('click',()=>{updState.phase==='available'?updInstall():updCheck()});
 updUI();
+
+// ===== v1.17.15 : infos de la photo, taille des vignettes, raccourcis clavier =====
+const INFO_KEY='guest-gallery-info';
+let infoOpen=false;
+try{infoOpen=localStorage.getItem(INFO_KEY)==='1'}catch(e){}
+function renderViewerInfo(){
+  const box=$('viewerInfo'),btn=$('infoBtn'),p=visible[currentIndex];
+  btn.setAttribute('aria-pressed',String(infoOpen));
+  const show=infoOpen&&$('viewer').classList.contains('open')&&!!p;
+  box.hidden=!show;if(!show)return;
+  const im=$('viewerImage'),dims=im.naturalWidth?im.naturalWidth+' × '+im.naturalHeight+' px':'…';
+  const type=(p.blob&&p.blob.type)||'',fmt=(type.split('/')[1]||(p.name.split('.').pop()||'')).toUpperCase();
+  const alb=albums.filter(a=>a.photoIds.includes(p.id)).map(a=>escapeHTML(a.name)).join(', ')||tr('infoNone');
+  const row=(k,v)=>'<dt>'+tr(k)+'</dt><dd>'+v+'</dd>';
+  box.innerHTML='<h4>'+tr('infoHead')+'</h4><dl>'+row('infoName',escapeHTML(p.name))+row('infoDims',dims)+row('infoSize',formatMetricBytes(p.blob?p.blob.size:0))+row('infoFormat',escapeHTML(fmt||'—'))+row('infoAdded',dateFmt.format(new Date(p.date)))+row('infoAlbums',alb)+'</dl>';
+}
+function toggleInfo(){infoOpen=!infoOpen;try{localStorage.setItem(INFO_KEY,infoOpen?'1':'0')}catch(e){}renderViewerInfo()}
+$('infoBtn').addEventListener('click',toggleInfo);
+$('viewerImage').addEventListener('load',renderViewerInfo);
+const _openViewer=openViewer;
+openViewer=function(i){_openViewer(i);renderViewerInfo()};
+const _closeViewer=closeViewer;
+closeViewer=function(){_closeViewer();$('viewerInfo').hidden=true};
+function renderKeys(){
+  const K=(keys,label)=>'<div class="keys-row"><span>'+tr(label)+'</span><span>'+keys.map(k=>'<kbd>'+k+'</kbd>').join('')+'</span></div>';
+  $('keysList').innerHTML=K(['←','→'],'kNav')+K([lang==='fr'?'Espace':'Space'],'kSlide')+K(['S'],'kShuf')+K(['F'],'kFs')+K(['+','−','0'],'kZoom')+K([lang==='fr'?'Début':'Home',lang==='fr'?'Fin':'End'],'kEnds')+K(['I'],'kInfo')+K([lang==='fr'?'Échap':'Esc'],'kClose')+K(['?'],'kHelp');
+}
+let keysFxOn=false;
+function keysFxTarget(){return{modal:$('keysModal'),dialog:document.querySelector('#keysModal .album-confirm-card'),glow:$('keysGlow')}}
+function openKeys(){renderKeys();closeThemePanel();$('keysModal').classList.add('open');keysFxOn=true;playAlbumCreateFx(keysFxTarget())}
+function closeKeys(){$('keysModal').classList.remove('open');if(keysFxOn){keysFxOn=false;stopAlbumCreateFx()}}
+$('keysBtn').addEventListener('click',openKeys);
+$('keysCloseBtn').addEventListener('click',closeKeys);
+$('keysModal').addEventListener('click',e=>{if(e.target===$('keysModal'))closeKeys()});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&$('keysModal').classList.contains('open')){closeKeys();return}
+  if(e.ctrlKey||e.metaKey||e.altKey||(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]')))return;
+  if(e.key==='?'){e.preventDefault();$('keysModal').classList.contains('open')?closeKeys():openKeys()}
+  else if((e.key==='i'||e.key==='I')&&$('viewer').classList.contains('open')){toggleInfo()}
+});
 </script>
 </body>
 </html>
